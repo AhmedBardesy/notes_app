@@ -23,7 +23,8 @@ class CustomNoteItem extends StatelessWidget {
                 style: TextStyle(fontSize: 20, color: Colors.black),
               ),
             ),
-            subtitle: Text('Ahmed khaled is the best software engeiner',
+            subtitle: Text('Ahmed khaled is the best software engeiner ',
+            maxLines: 3,
                 style: TextStyle(color: Colors.black.withOpacity(.6))),
             trailing: IconButton(
                 icon: Icon(
