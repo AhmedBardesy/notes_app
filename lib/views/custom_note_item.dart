@@ -5,7 +5,7 @@ class CustomNoteItem extends StatelessWidget {
   const CustomNoteItem({
     super.key,
   });
-
+//add a comment
   @override
   Widget build(BuildContext context) {
     return Container(
