@@ -1,3 +1,4 @@
+import 'package:app11_nots/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -7,6 +8,7 @@ import 'views/homeView.dart';
 void main() async{
   await Hive.initFlutter();
   await Hive.openBox(kNotesBox);
+  Hive.registerAdapter(NoteModelAdapter());
   runApp(const MyApp());
 }
 
