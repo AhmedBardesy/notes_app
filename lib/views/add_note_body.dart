@@ -1,30 +1,35 @@
 import 'package:app11_nots/cubits/cubit/add_note_cubit_cubit.dart';
+import 'package:app11_nots/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-Container add_note_body() {
-  return Container(
-    child: Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      child: SingleChildScrollView(
-        child: BlocConsumer<AddNoteCubitCubit, AddNoteCubitState>(
-          listener: (context, state) {
-            if (state is AddNoteCubitFailer) {
-              print('Failed ${state.errorMessage}');
-            } else if (state is AddNoteCubitSuccess) {
-              Navigator.pop(context);
-            }
-          },
-          builder: (context, state) {
-            return ModalProgressHUD(
-                inAsyncCall: state is AddNoteCubitLoading ? true : false,
-                child: addnoteForm());
-          },
+class add_note_body extends StatelessWidget {
+  const add_note_body({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: BlocProvider(
+        create: (context) => AddNoteCubitCubit(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: BlocConsumer<AddNoteCubitCubit, AddNoteCubitState>(
+            listener: (context, state) {
+              if (state is AddNoteCubitFailer) {
+                print('Failed ${state.errorMessage}');
+              } else if (state is AddNoteCubitSuccess) {
+                Navigator.pop(context);
+              }
+            },
+            builder: (context, state) {
+              return const SingleChildScrollView(child: addnoteForm());
+            },
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class addnoteForm extends StatefulWidget {
@@ -71,16 +76,28 @@ class _NewWidgetState extends State<addnoteForm> {
           const SizedBox(
             height: 25,
           ),
-          custom_button(
-            pressed: () {
-              if (formkey.currentState!.validate()) {
-                formkey.currentState!.save();
-              } else {
-                autovalidateMode = AutovalidateMode.always;
-              }
+          BlocBuilder<AddNoteCubitCubit, AddNoteCubitState>(
+            builder: (context, state) {
+              return custom_button(
+              loading: state is AddNoteCubitLoading ?true:false,
+              pressed: () {
+                if (formkey.currentState!.validate()) {
+                  formkey.currentState!.save();
+                } else {
+                  autovalidateMode = AutovalidateMode.always;
+                }
+                var note = NoteModel(
+                    title: title!,
+                    subtitle: subtitle!,
+                    date: DateTime.now().toString(),
+                    dolor: Colors.blueGrey.value);
+          
+                BlocProvider.of<AddNoteCubitCubit>(context).addNote(note);
+              },
+            );
             },
-          ),
-          const SizedBox(
+          )
+          ,const SizedBox(
             height: 35,
           ),
         ],
@@ -129,9 +146,11 @@ OutlineInputBorder border([color]) {
 class custom_button extends StatelessWidget {
   const custom_button({
     super.key,
-    this.pressed,
+    this.pressed, required this.loading,
   });
   final void Function()? pressed;
+  final bool loading;
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -146,8 +165,10 @@ class custom_button extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: const Text(
-          'add',
+        child: 
+        loading==true?SizedBox(height: 24,width: 24, child: const CircularProgressIndicator(color: Colors.black,)) : 
+        const Text(
+         'add',
           style: TextStyle(color: Colors.black, fontSize: 15),
         ),
       ),
