@@ -3,6 +3,8 @@ import 'package:app11_nots/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:intl/intl.dart';
+
 
 class add_note_body extends StatelessWidget {
   const add_note_body({super.key});
@@ -23,7 +25,9 @@ class add_note_body extends StatelessWidget {
               }
             },
             builder: (context, state) {
-              return const SingleChildScrollView(child: addnoteForm());
+              return AbsorbPointer(
+                absorbing: state is AddNoteCubitLoading?true :false,
+                  child: const SingleChildScrollView(child: addnoteForm()));
             },
           ),
         ),
@@ -79,25 +83,28 @@ class _NewWidgetState extends State<addnoteForm> {
           BlocBuilder<AddNoteCubitCubit, AddNoteCubitState>(
             builder: (context, state) {
               return custom_button(
-              loading: state is AddNoteCubitLoading ?true:false,
-              pressed: () {
-                if (formkey.currentState!.validate()) {
-                  formkey.currentState!.save();
-                } else {
-                  autovalidateMode = AutovalidateMode.always;
-                }
-                var note = NoteModel(
-                    title: title!,
-                    subtitle: subtitle!,
-                    date: DateTime.now().toString(),
-                    dolor: Colors.blueGrey.value);
-          
-                BlocProvider.of<AddNoteCubitCubit>(context).addNote(note);
-              },
-            );
+                loading: state is AddNoteCubitLoading ? true : false,
+                pressed: () {
+                  if (formkey.currentState!.validate()) {
+                    formkey.currentState!.save();
+                  } else {
+                    autovalidateMode = AutovalidateMode.always;
+                  }
+                  var now = DateTime.now();
+                  var formated = DateFormat.yMEd().format(now);
+                  var note = NoteModel(
+                      title: title!,
+                      subtitle: subtitle!,
+                      date:formated,
+                     
+                      dolor: Colors.blueGrey.value);
+
+                  BlocProvider.of<AddNoteCubitCubit>(context).addNote(note);
+                },
+              );
             },
-          )
-          ,const SizedBox(
+          ),
+          const SizedBox(
             height: 35,
           ),
         ],
@@ -146,11 +153,12 @@ OutlineInputBorder border([color]) {
 class custom_button extends StatelessWidget {
   const custom_button({
     super.key,
-    this.pressed, required this.loading,
+    this.pressed,
+    required this.loading,
   });
   final void Function()? pressed;
   final bool loading;
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -165,12 +173,17 @@ class custom_button extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: 
-        loading==true?SizedBox(height: 24,width: 24, child: const CircularProgressIndicator(color: Colors.black,)) : 
-        const Text(
-         'add',
-          style: TextStyle(color: Colors.black, fontSize: 15),
-        ),
+        child: loading == true
+            ? SizedBox(
+                height: 24,
+                width: 24,
+                child: const CircularProgressIndicator(
+                  color: Colors.black,
+                ))
+            : const Text(
+                'add',
+                style: TextStyle(color: Colors.black, fontSize: 15),
+              ),
       ),
     );
   }
